@@ -16,27 +16,39 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { FontAwesome, AntDesign, Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import AppLoading from "expo-app-loading";
-import { fontConfig, vh, vw } from "./constants/Constants";
-import { SideBar } from "./constants/Components";
-import { AccentColorProvider } from "./constants/Context";
+import { COLORS, fontConfig, vh, vw } from "./constants/Constants";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { Header, Provider, SideBar } from "./constants/Components";
+import {
+  AccentColorProvider,
+  useAccentColor,
+  useTheme,
+} from "./constants/Context";
+import { withTiming } from "react-native-reanimated";
+import { StatusBar } from "expo-status-bar";
+import { Text } from "react-native";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator: FC<
   NativeStackScreenProps<RootStackParamList, "DrawerList">
 > = () => {
+  const [accentColor, _] = useAccentColor();
+  const [theme, __] = useTheme();
+
   return (
     <Drawer.Navigator
       initialRouteName="Home"
       drawerContent={(props) => <SideBar {...props} />}
       screenOptions={{
-        headerShown: false,
-        drawerActiveBackgroundColor: "#bd14ca",
+        header: ({ route }) => <Header routeName={route.name} />,
+        drawerActiveBackgroundColor: accentColor,
         drawerStatusBarAnimation: "fade",
         drawerPosition: "left",
         drawerActiveTintColor: "#fff",
-        drawerInactiveBackgroundColor: "#fff",
-        drawerInactiveTintColor: "gray",
+        drawerInactiveBackgroundColor: "transparent",
+        drawerInactiveTintColor: theme.type === "light" ? "gray" : "white",
+
         drawerLabelStyle: {
           fontFamily: "montserrat",
           fontSize: 5 * vw,
@@ -78,22 +90,27 @@ const DrawerNavigator: FC<
 };
 const App: FC<NativeStackScreenProps<RootStackParamList, "Chat">> = () => {
   const [fontsLoaded] = useFonts(fontConfig);
+  async function setScreenOrientation() {
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT
+    );
+  }
+  useEffect(() => {
+    setScreenOrientation();
+  }, []);
   if (fontsLoaded) {
     return (
-      <AccentColorProvider>
-        <SafeAreaProvider>
-          <NavigationContainer>
-            <Stack.Navigator>
-              <Stack.Screen
-                name="DrawerList"
-                component={DrawerNavigator}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen component={ChatScreen} name={"Chat"} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </SafeAreaProvider>
-      </AccentColorProvider>
+      <Provider>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="DrawerList"
+            component={DrawerNavigator}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen component={ChatScreen} name={"Chat"} />
+        </Stack.Navigator>
+        <StatusBar animated={true} style="light" />
+      </Provider>
     );
   } else {
     return <AppLoading />;

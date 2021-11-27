@@ -24,3 +24,8 @@ export type room = {
   isPrivate: boolean;
   membersLength?: number;
 };
+
+export type theme = {
+  type: "light" | "dark" | undefined | null;
+  hasOverRidden: boolean;
+};

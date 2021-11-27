@@ -7,10 +7,19 @@ const HomePageStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  box: {
-    height: 100,
-    backgroundColor: "red",
-    margin: 10,
+  companyWrapper: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  companyText: {
+    fontFamily: "raleway",
+    fontSize: 15 * vw,
+  },
+  iconWrapper: {
+    width: "100%",
+    alignItems: "center",
   },
 });
 export default HomePageStyles;

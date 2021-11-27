@@ -3,12 +3,16 @@ import React from "react";
 import { View, Text } from "react-native";
 import { DrawerParamList } from "../constants/Types";
 
-const CreateRoom = (
-  navigation: NativeStackNavigationProp<DrawerParamList, "Create">
-) => {
+const CreateRoom = ({
+  navigation,
+}: {
+  navigation: NativeStackNavigationProp<DrawerParamList, "Create">;
+}) => {
   return (
     <View>
-      <Text>Create a room</Text>
+      <Text onPress={() => navigation.navigate("Home")} style={{ margin: 20 }}>
+        Create a room
+      </Text>
     </View>
   );
 };
