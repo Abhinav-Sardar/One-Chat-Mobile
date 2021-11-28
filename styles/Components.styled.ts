@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
 import { vw, vh } from "../constants/Constants";
+import { StatusBar } from "react-native";
+
 export default StyleSheet.create({
   header: {
     flexDirection: "row",
@@ -13,7 +15,7 @@ export default StyleSheet.create({
   },
   themeIndicator: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
   },
   rippleButton: {
@@ -30,13 +32,12 @@ export default StyleSheet.create({
     fontSize: 20,
   },
   headerBanner: {
-    backgroundColor: "white",
-    height: 10 * vh,
+    elevation: 6,
+    // @ts-ignore
+    height:
+      (StatusBar.currentHeight ? StatusBar.currentHeight : 7 * vh) + 5 * vh,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    borderTopLeftRadius: 6,
-    borderWidth: 5,
-    borderColor: "#bd14ca",
+    justifyContent: "space-between",
   },
 });

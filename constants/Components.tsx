@@ -4,17 +4,20 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import React, { FC, useEffect, useState } from "react";
+import Storage from "@react-native-async-storage/async-storage";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import {
   View,
   Text,
-  StyleSheet,
-  useColorScheme,
-  TouchableOpacity,
   Switch,
   StyleProp,
   TextStyle,
   ViewStyle,
+  StatusBar,
   Pressable,
+  TouchableNativeFeedback,
+  Animated,
 } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +28,7 @@ import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
+  useNavigation,
 } from "@react-navigation/native";
 import {
   AccentColorProvider,
@@ -32,107 +36,80 @@ import {
   useAccentColor,
   useTheme,
 } from "./Context";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import { theme } from "./Types";
-import ComponentStyles from "../styles/Components";
+import { HeaderProps, RootStackParamList, theme } from "./Types";
+import ComponentStyles from "../styles/Components.styled";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { TouchableOpacity } from "react-native-gesture-handler";
 // @ts-ignore
 export const SideBar = (props) => {
   const [theme, setTheme] = useTheme();
   const [accentColor, setAccentColor] = useAccentColor();
+
   return (
-    <Opacitor style={{}}>
-      <View style={{ flex: 1, marginTop: 50 }}>
-        <View style={ComponentStyles.header}>
-          <AccentText style={ComponentStyles.headerTitle}>One-Chat</AccentText>
-          <Ionicons name="chatbox-sharp" size={35} color={accentColor} />
-        </View>
-        <DrawerContentScrollView {...props}>
-          <DrawerItemList {...props} />
-          <View style={ComponentStyles.themeIndicator}>
+    <View style={{ flex: 1, marginTop: 50 }}>
+      <View style={ComponentStyles.header}>
+        <AccentText style={ComponentStyles.headerTitle}>One-Chat</AccentText>
+        <Ionicons name="chatbox-sharp" size={35} color={accentColor} />
+      </View>
+      <DrawerContentScrollView {...props}>
+        <DrawerItemList {...props} />
+        <View style={ComponentStyles.themeIndicator}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-around",
+              flex: 0.8,
+            }}
+          >
+            <FontAwesome5
+              name={theme.type === "light" ? "sun" : "moon"}
+              size={24}
+              color={theme.type === "light" ? "black" : "white"}
+              style={{}}
+            />
             <Text
               style={{
-                color: theme.type === "light" ? COLORS.dark : COLORS.light,
+                fontSize: 4.5 * vw,
                 fontFamily: "montserrat",
-                fontSize: vw * 5,
-                marginLeft: 10,
+                color: theme.type === "light" ? "black" : "white",
               }}
             >
-              {theme.type?.toUpperCase()} Theme
+              {theme.type === "light" ? "Light" : "Dark"} Theme
             </Text>
-            <Switch
-              thumbColor={accentColor}
-              value={theme.type === "dark"}
-              onValueChange={async (value) => {
-                const newTheme: theme = {
-                  type: value ? "dark" : "light",
-                  hasOverRidden: true,
-                };
-                // @ts-ignore
-                setTheme(newTheme);
-                await AsyncStoage.setItem(
-                  "one-chat-theme",
-                  JSON.stringify(newTheme)
-                );
-              }}
-            />
           </View>
-        </DrawerContentScrollView>
-      </View>
-    </Opacitor>
+
+          <Switch
+            thumbColor={accentColor}
+            style={{
+              flex: 0.4,
+            }}
+            value={theme.type === "dark"}
+            onValueChange={async (value) => {
+              const newTheme: theme = {
+                type: value ? "dark" : "light",
+                hasOverRidden: true,
+              };
+              setTheme(newTheme);
+              await AsyncStoage.setItem(
+                "one-chat-theme",
+                JSON.stringify(newTheme)
+              );
+            }}
+          />
+        </View>
+      </DrawerContentScrollView>
+    </View>
   );
 };
 
-export const Provider: FC = ({ children }) => {
-  const [theme, _] = useTheme();
+export const HOC: FC = ({ children }) => {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <AccentColorProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </AccentColorProvider>
-      </NavigationContainer>
+      <ThemeProvider>
+        <AccentColorProvider>{children}</AccentColorProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
-  );
-};
-export const Opacitor: FC<{ style?: ViewStyle }> = ({ children }) => {
-  const theme = useTheme()[0];
-  const opacity = useSharedValue(0);
-  const color = useSharedValue(
-    theme.type === "dark" ? COLORS.dark : COLORS.light
-  );
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(opacity.value, {
-        duration: 400,
-      }),
-      backgroundColor: withTiming(color.value, {
-        duration: 400,
-        easing: Easing.ease,
-      }),
-    };
-  }, [theme]);
-  useEffect(() => {
-    opacity.value = 1;
-  }, []);
-  useEffect(() => {
-    color.value = theme.type === "dark" ? COLORS.dark : COLORS.light;
-  }, [theme]);
-  return (
-    <Animated.View
-      style={[
-        animatedStyle,
-        {
-          flex: 1,
-        },
-      ]}
-    >
-      {children}
-    </Animated.View>
   );
 };
 
@@ -152,6 +129,7 @@ export const OneButton: FC<{ style: { color: string; bg: string } }> = ({
     <Ripple
       rippleOpacity={0.2}
       rippleDuration={500}
+      rippleColor="#fff"
       style={[ComponentStyles.rippleButton, { backgroundColor: style.bg }]}
     >
       <Text
@@ -167,10 +145,77 @@ export const OneButton: FC<{ style: { color: string; bg: string } }> = ({
     </Ripple>
   );
 };
-export const Header: FC<{ routeName: string }> = ({ routeName }) => {
+export const Header: FC<HeaderProps> = (props) => {
+  const { canGoBack, goBack, toggleDrawer, routeName } = props;
+  const theme = useTheme()[0];
+
   return (
-    <View style={ComponentStyles.headerBanner}>
-      <Text>{routeName}</Text>
+    <View
+      style={[
+        ComponentStyles.headerBanner,
+        {
+          backgroundColor: theme.type === "dark" ? "rgb(18, 18 , 18)" : "#fff",
+          elevation: 5,
+        },
+      ]}
+    >
+      {routeName !== "Home" && (
+        <TouchableOpacity onPress={goBack}>
+          <Ionicons
+            name="ios-arrow-back"
+            size={30}
+            color={theme.type === "dark" ? "#fff" : "#000"}
+            style={{
+              marginLeft: 2 * vw,
+            }}
+          />
+        </TouchableOpacity>
+      )}
+      <AccentText
+        style={{
+          fontSize: vw * 6,
+          fontFamily: "quicksand",
+          marginLeft: routeName !== "Home" ? 0 : vw * 5,
+        }}
+      >
+        {routeName}
+      </AccentText>
+      <TouchableOpacity onPress={toggleDrawer}>
+        <Ionicons
+          name="md-reorder-three"
+          size={40}
+          color={theme.type === "dark" ? "#fff" : "#000"}
+          style={{
+            marginRight: 2 * vw,
+          }}
+        />
+      </TouchableOpacity>
     </View>
+  );
+};
+
+export const Navigator: FC = ({ children }) => {
+  const theme = useTheme()[0];
+  const accentColor = useAccentColor()[0];
+  return (
+    <>
+      <NavigationContainer
+        theme={
+          theme.type === "dark"
+            ? DarkTheme
+            : {
+                ...DefaultTheme,
+                colors: { ...DefaultTheme.colors, background: "#fff" },
+              }
+        }
+      >
+        {children}
+      </NavigationContainer>
+      <StatusBar
+        animated
+        barStyle={"light-content"}
+        backgroundColor={accentColor}
+      />
+    </>
   );
 };

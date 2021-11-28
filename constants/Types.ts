@@ -26,6 +26,12 @@ export type room = {
 };
 
 export type theme = {
-  type: "light" | "dark" | undefined | null;
+  type: "light" | "dark";
   hasOverRidden: boolean;
 };
+export interface HeaderProps {
+  routeName: string;
+  canGoBack: () => boolean;
+  goBack: () => void;
+  toggleDrawer: () => void;
+}

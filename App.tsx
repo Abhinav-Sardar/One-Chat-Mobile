@@ -1,4 +1,8 @@
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from "@react-navigation/native";
 import React, { FC, useEffect, useState } from "react";
 import {
   createNativeStackNavigator,
@@ -18,12 +22,13 @@ import { useFonts } from "expo-font";
 import AppLoading from "expo-app-loading";
 import { COLORS, fontConfig, vh, vw } from "./constants/Constants";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { Header, Provider, SideBar } from "./constants/Components";
+import { Header, HOC, SideBar, Navigator } from "./constants/Components";
 import {
   AccentColorProvider,
   useAccentColor,
   useTheme,
 } from "./constants/Context";
+
 import { withTiming } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import { Text } from "react-native";
@@ -33,22 +38,32 @@ const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator: FC<
   NativeStackScreenProps<RootStackParamList, "DrawerList">
 > = () => {
-  const [accentColor, _] = useAccentColor();
-  const [theme, __] = useTheme();
+  const accentColor = useAccentColor()[0];
+  const theme = useTheme()[0];
 
   return (
     <Drawer.Navigator
       initialRouteName="Home"
       drawerContent={(props) => <SideBar {...props} />}
+      backBehavior="initialRoute"
       screenOptions={{
-        header: ({ route }) => <Header routeName={route.name} />,
+        header: ({
+          route: { name },
+          navigation: { canGoBack, goBack, toggleDrawer },
+        }) => (
+          <Header
+            routeName={name}
+            canGoBack={canGoBack}
+            goBack={goBack}
+            toggleDrawer={toggleDrawer}
+          />
+        ),
         drawerActiveBackgroundColor: accentColor,
         drawerStatusBarAnimation: "fade",
         drawerPosition: "left",
         drawerActiveTintColor: "#fff",
         drawerInactiveBackgroundColor: "transparent",
         drawerInactiveTintColor: theme.type === "light" ? "gray" : "white",
-
         drawerLabelStyle: {
           fontFamily: "montserrat",
           fontSize: 5 * vw,
@@ -100,17 +115,18 @@ const App: FC<NativeStackScreenProps<RootStackParamList, "Chat">> = () => {
   }, []);
   if (fontsLoaded) {
     return (
-      <Provider>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="DrawerList"
-            component={DrawerNavigator}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen component={ChatScreen} name={"Chat"} />
-        </Stack.Navigator>
-        <StatusBar animated={true} style="light" />
-      </Provider>
+      <HOC>
+        <Navigator>
+          <Stack.Navigator>
+            <Stack.Screen
+              name="DrawerList"
+              component={DrawerNavigator}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen component={ChatScreen} name={"Chat"} />
+          </Stack.Navigator>
+        </Navigator>
+      </HOC>
     );
   } else {
     return <AppLoading />;

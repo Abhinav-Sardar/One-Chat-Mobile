@@ -3,10 +3,17 @@ import React, { createContext, FC } from "react";
 import Storage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "react-native";
 import { theme } from "./Types";
+import { EventRegister } from "react-native-event-listeners";
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from "@react-navigation/native";
+
 export const AccentColorContext = createContext<[string, any]>([
   "#bd14ca",
   null,
-]);
+])
 export const AccentColorProvider: FC = ({ children }) => {
   const [accentColor, setAccentColor] = useState<string>("#bd14ca");
   const checkAccentColor = async () => {
@@ -30,8 +37,8 @@ export const AccentColorProvider: FC = ({ children }) => {
 export const useAccentColor = () => useContext(AccentColorContext);
 
 export const ThemeContext = createContext<
-  [theme, null | React.Dispatch<React.SetStateAction<theme>>]
->([{ hasOverRidden: false, type: "light" }, null]);
+  [theme, React.Dispatch<React.SetStateAction<theme>>]
+>([{ hasOverRidden: false, type: "light" }, () => {}]);
 export const ThemeProvider: FC = ({ children }) => {
   const phoneTheme = useColorScheme();
   const [theme, setTheme] = useState<theme>({
@@ -72,3 +79,4 @@ export const ThemeProvider: FC = ({ children }) => {
   );
 };
 export const useTheme = () => useContext(ThemeContext);
+

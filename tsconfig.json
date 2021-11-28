@@ -3,6 +3,11 @@
 
   "compilerOptions": {
     "target": "ES2016",
-    "strict": true
+    "strict": true,
+    "noImplicitAny": false,
+    "jsx": "react-native",
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   }
 }
