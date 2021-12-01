@@ -8,7 +8,6 @@ import Storage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
-  View,
   Text,
   Switch,
   StyleProp,
@@ -17,7 +16,12 @@ import {
   StatusBar,
   Pressable,
   TouchableNativeFeedback,
-  Animated,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+  Keyboard,
+  Modal,
+  View,
+  Button,
 } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -36,17 +40,47 @@ import {
   useAccentColor,
   useTheme,
 } from "./Context";
-import { HeaderProps, RootStackParamList, theme } from "./Types";
+import {
+  HeaderProps,
+  ModalProps,
+  OneButtonProps,
+  RootStackParamList,
+  theme,
+} from "./Types";
 import ComponentStyles from "../styles/Components.styled";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import Animated, {
+  interpolate,
+  useAnimatedGestureHandler,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from "react-native-gesture-handler";
 // @ts-ignore
 export const SideBar = (props) => {
   const [theme, setTheme] = useTheme();
   const [accentColor, setAccentColor] = useAccentColor();
-
+  const rotation = useSharedValue<number>(0);
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: `${rotation.value}deg`,
+      },
+    ],
+  }));
+  useEffect(() => {
+    rotation.value = withSpring(theme.type === "dark" ? 360 : 0, {
+      stiffness: 50,
+    });
+  }, [theme]);
   return (
-    <View style={{ flex: 1, marginTop: 50 }}>
+    <View style={{ flex: 1 }}>
       <View style={ComponentStyles.header}>
         <AccentText style={ComponentStyles.headerTitle}>One-Chat</AccentText>
         <Ionicons name="chatbox-sharp" size={35} color={accentColor} />
@@ -62,12 +96,13 @@ export const SideBar = (props) => {
               flex: 0.8,
             }}
           >
-            <FontAwesome5
-              name={theme.type === "light" ? "sun" : "moon"}
-              size={24}
-              color={theme.type === "light" ? "black" : "white"}
-              style={{}}
-            />
+            <Animated.View style={iconStyle}>
+              <FontAwesome5
+                name={theme.type === "light" ? "sun" : "moon"}
+                size={24}
+                color={theme.type === "light" ? "black" : "white"}
+              />
+            </Animated.View>
             <Text
               style={{
                 fontSize: 4.5 * vw,
@@ -121,27 +156,24 @@ export const AccentText: FC<{ style?: StyleProp<TextStyle> }> = ({
   return <Text style={[{ color: accentColor }, style]}>{children}</Text>;
 };
 
-export const OneButton: FC<{ style: { color: string; bg: string } }> = ({
-  style,
+export const OneButton: FC<OneButtonProps> = ({
+  textStyle,
+  viewStyle,
   children,
+  Icon,
+
+  onPress,
 }) => {
   return (
     <Ripple
       rippleOpacity={0.2}
       rippleDuration={500}
       rippleColor="#fff"
-      style={[ComponentStyles.rippleButton, { backgroundColor: style.bg }]}
+      style={[ComponentStyles.rippleButton, viewStyle]}
+      onPress={onPress}
     >
-      <Text
-        style={[
-          ComponentStyles.rippleText,
-          {
-            color: style.color,
-          },
-        ]}
-      >
-        {children}
-      </Text>
+      <Text style={[ComponentStyles.rippleText, textStyle]}>{children}</Text>
+      {Icon && <Icon />}
     </Ripple>
   );
 };
@@ -150,7 +182,9 @@ export const Header: FC<HeaderProps> = (props) => {
   const theme = useTheme()[0];
 
   return (
-    <View
+    <Pressable
+      android_disableSound
+      onPress={Keyboard.dismiss}
       style={[
         ComponentStyles.headerBanner,
         {
@@ -190,13 +224,12 @@ export const Header: FC<HeaderProps> = (props) => {
           }}
         />
       </TouchableOpacity>
-    </View>
+    </Pressable>
   );
 };
 
 export const Navigator: FC = ({ children }) => {
   const theme = useTheme()[0];
-  const accentColor = useAccentColor()[0];
   return (
     <>
       <NavigationContainer
@@ -211,11 +244,59 @@ export const Navigator: FC = ({ children }) => {
       >
         {children}
       </NavigationContainer>
-      <StatusBar
-        animated
-        barStyle={"light-content"}
-        backgroundColor={accentColor}
-      />
     </>
+  );
+};
+const BOTTOM_SHEET_HEIGHT =
+  100 * vh -
+  (StatusBar.currentHeight ? StatusBar.currentHeight : 7 * vh) +
+  5 * vh;
+export const BottomSheet: FC<ModalProps> = (props) => {
+  const { visible, onClose, children, initialSnapPoint, title } = props;
+  const top = useSharedValue(BOTTOM_SHEET_HEIGHT);
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      top: top.value,
+    };
+  });
+  const trimMax = (value: number) => {
+    "worklet";
+    return Math.max(value, 0);
+  };
+
+  useEffect(() => {
+    if (visible) {
+      top.value = withSpring(initialSnapPoint);
+    } else {
+      top.value = withSpring(BOTTOM_SHEET_HEIGHT);
+    }
+  }, [visible]);
+  const panGesture = useAnimatedGestureHandler<
+    PanGestureHandlerGestureEvent,
+    { translationY: number }
+  >({
+    onStart: (_, ctx) => {
+      ctx.translationY = top.value;
+    },
+    onEnd: (event) => {
+      console.log(BOTTOM_SHEET_HEIGHT, top.value);
+    },
+    onActive: ({ translationY }, ctx) => {
+      top.value = trimMax(ctx.translationY + translationY);
+    },
+  });
+  return (
+    <Animated.View style={[ComponentStyles.bottomSheet, animatedStyle]}>
+      <PanGestureHandler onGestureEvent={panGesture}>
+        <Animated.View
+          style={{
+            height: 10 * vh,
+            width: "100%",
+            borderWidth: 5,
+            borderColor: "#fff",
+          }}
+        />
+      </PanGestureHandler>
+    </Animated.View>
   );
 };

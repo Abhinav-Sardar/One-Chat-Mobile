@@ -66,7 +66,7 @@ const DrawerNavigator: FC<
         drawerInactiveTintColor: theme.type === "light" ? "gray" : "white",
         drawerLabelStyle: {
           fontFamily: "montserrat",
-          fontSize: 5 * vw,
+          fontSize: 20,
         },
         drawerItemStyle: {
           borderRadius: 10,

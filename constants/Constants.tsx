@@ -1,20 +1,9 @@
 import React, { FC, useState } from "react";
 import { Appearance, Dimensions, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "./Types";
-import { useAccentColor } from "./Context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DrawerContentScrollView } from "@react-navigation/drawer";
+import { createAvatar } from "@dicebear/avatars";
+import * as style from "@dicebear/avatars-avataaars-sprites";
 export const vw = Dimensions.get("window").width / 100;
 export const vh = Dimensions.get("window").height / 100;
-export const screens = {
-  home: "Home",
-  chat: "Chat",
-  create: "Create",
-  join: "Join",
-  customize: "Customize",
-  publicRooms: "Public-Rooms",
-};
 export const COLORS: { light: string; dark: string } = {
   light: "#fff",
   dark: "#000",
@@ -25,4 +14,29 @@ export const fontConfig = {
   quicksand: require("../assets/fonts/Quicksand-Regular.ttf"),
   robboto: require("../assets/fonts/Roboto-Regular.ttf"),
   montserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
+};
+export const getAvatars = () => {
+  let avatars: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const avatar = createAvatar(style);
+    avatars.push(avatar);
+  }
+  return avatars;
+};
+
+export const validateNameAndRoomName: (
+  name: string,
+  roomName: string
+) => true | string = (name: string, roomName: string) => {
+  if (!name || !roomName.trim()) {
+    return "Invalid Name!";
+  } else if (name.length > 20) {
+    return "Name is too long!";
+  } else if (!roomName || !roomName.trim()) {
+    return "Invalid Room Name!";
+  } else if (roomName.length > 20) {
+    return "Room Name is too long!";
+  } else {
+    return true;
+  }
 };

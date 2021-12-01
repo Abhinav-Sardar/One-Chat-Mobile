@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import React, { createContext, FC } from "react";
 import Storage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "react-native";
+import { StatusBar, useColorScheme } from "react-native";
 import { theme } from "./Types";
 import { EventRegister } from "react-native-event-listeners";
 import {
@@ -13,7 +13,7 @@ import {
 export const AccentColorContext = createContext<[string, any]>([
   "#bd14ca",
   null,
-])
+]);
 export const AccentColorProvider: FC = ({ children }) => {
   const [accentColor, setAccentColor] = useState<string>("#bd14ca");
   const checkAccentColor = async () => {
@@ -30,6 +30,11 @@ export const AccentColorProvider: FC = ({ children }) => {
   return (
     <AccentColorContext.Provider value={[accentColor, setAccentColor]}>
       {children}
+      <StatusBar
+        animated
+        barStyle={"light-content"}
+        backgroundColor={accentColor}
+      />
     </AccentColorContext.Provider>
   );
 };
@@ -79,4 +84,3 @@ export const ThemeProvider: FC = ({ children }) => {
   );
 };
 export const useTheme = () => useContext(ThemeContext);
-

@@ -1,5 +1,6 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
-import { screens } from "./Constants";
+import React from "react";
+import { Share, StyleProp, TextStyle, ViewStyle } from "react-native";
 export type DrawerParamList = {
   Home: undefined;
   Create: undefined;
@@ -34,4 +35,19 @@ export interface HeaderProps {
   canGoBack: () => boolean;
   goBack: () => void;
   toggleDrawer: () => void;
+}
+
+export interface OneButtonProps {
+  viewStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  Icon?: React.ComponentType<any>;
+
+  onPress: () => any;
+}
+
+export interface ModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  initialSnapPoint: number;
 }
