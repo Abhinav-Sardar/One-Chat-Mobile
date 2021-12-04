@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { Appearance, Dimensions, Text } from "react-native";
+import { Appearance, Dimensions, StatusBar, Text } from "react-native";
 import { createAvatar } from "@dicebear/avatars";
 import * as style from "@dicebear/avatars-avataaars-sprites";
 export const vw = Dimensions.get("window").width / 100;
@@ -24,10 +24,10 @@ export const getAvatars = () => {
   return avatars;
 };
 
-export const validateNameAndRoomName: (
+export function validateNameAndRoomnName(
   name: string,
   roomName: string
-) => true | string = (name: string, roomName: string) => {
+): boolean | string {
   if (!name || !roomName.trim()) {
     return "Invalid Name!";
   } else if (name.length > 20) {
@@ -39,4 +39,17 @@ export const validateNameAndRoomName: (
   } else {
     return true;
   }
+}
+
+export const MAX_BOTTOM_SHEET_HEIGHT: number =
+  100 * vh -
+  (StatusBar.currentHeight ? StatusBar.currentHeight : 7 * vh) +
+  5 * vh;
+
+export const SPRING_CONFIG = {
+  damping: 80,
+  overshootClamping: true,
+  restDisplacementThreshold: 0.1,
+  restSpeedThreshold: 0.1,
+  stiffness: 500,
 };

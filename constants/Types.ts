@@ -1,6 +1,7 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
 import React from "react";
 import { Share, StyleProp, TextStyle, ViewStyle } from "react-native";
+import Animated from "react-native-reanimated";
 export type DrawerParamList = {
   Home: undefined;
   Create: undefined;
@@ -42,12 +43,11 @@ export interface OneButtonProps {
   textStyle?: StyleProp<TextStyle>;
   Icon?: React.ComponentType<any>;
 
-  onPress: () => any;
+  onPress: () => void;
 }
 
-export interface ModalProps {
-  visible: boolean;
-  onClose: () => void;
+export interface BottomSheetProps {
   title: string;
   initialSnapPoint: number;
+  top: Animated.SharedValue<number>;
 }
