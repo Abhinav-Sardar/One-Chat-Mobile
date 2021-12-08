@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
 	View,
 	Text,
@@ -14,6 +14,7 @@ import {
 	VirtualizedList,
 	ToastAndroid,
 	ActivityIndicator,
+	Vibration,
 } from "react-native";
 import { AccentText, BottomSheet, OneButton } from "../constants/Components";
 import io from "socket.io-client";
@@ -21,9 +22,12 @@ import { CreateRoomStyles } from "../styles/CreateRoom.styled";
 import { SvgXml } from "react-native-svg";
 import { useAccentColor, useTheme } from "../constants/Context";
 import {
-	avatars,
+	Alerts,
+	getAvatars,
 	getRandomKey,
+	IsRoomThere,
 	MAX_BOTTOM_SHEET_HEIGHT,
+	serverName,
 	TransitionConfig,
 	validateNameAndRoomnName,
 	vh,
@@ -32,18 +36,58 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { runOnJS, useSharedValue, withTiming } from "react-native-reanimated";
+import { room, RootStackParamList } from "../constants/Types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+const avatars = getAvatars();
 
-const CreateRoom: FC = () => {
+const CreateRoom: FC<{
+	navigation: NativeStackNavigationProp<RootStackParamList, "DrawerList">;
+}> = ({ navigation }) => {
 	const [name, setName] = useState<string>("");
 	const [roomName, setRoomName] = useState<string>("");
 	const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
 	const theme = useTheme()[0];
 	const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+	const socket = io(serverName);
 	const hamdleSubmit = () => {
 		const status = validateNameAndRoomnName(name, roomName);
 		if (typeof status === "string") {
-			console.log(status);
+			ToastAndroid.showWithGravity(
+				status,
+				ToastAndroid.SHORT,
+				ToastAndroid.BOTTOM
+			);
+			Vibration.vibrate(100);
 		} else {
+			socket.connect();
+			socket.emit("rooms");
+			socket.on("rooms-back", (rooms: room[]) => {
+				socket.removeAllListeners("rooms-back");
+				if (IsRoomThere(rooms, roomName)) {
+					// @ts-ignore
+					socket.disconnect(true);
+					ToastAndroid.showWithGravity(
+						Alerts.RoomAlreadyExist,
+						ToastAndroid.SHORT,
+						ToastAndroid.BOTTOM
+					);
+				} else {
+					Vibration.vibrate(1000);
+					socket.disconnect();
+					setIsSheetOpen(false);
+					setName("");
+					setRoomName("");
+					navigation.navigate("Chat", {
+						isPrivate: false,
+						user: {
+							name,
+							// @ts-ignore
+							avatarSvg: currentAvatar,
+							roomName,
+						},
+					});
+				}
+			});
 		}
 	};
 	useEffect(() => {
@@ -118,7 +162,7 @@ const CreateRoom: FC = () => {
 					</OneButton>
 				</View>
 				<OneButton
-					onPress={() => {}}
+					onPress={hamdleSubmit}
 					viewStyle={{
 						backgroundColor: accentColor,
 						width: 46 * vw,
@@ -156,6 +200,7 @@ const CreateRoom: FC = () => {
 								style={{
 									...CreateRoomStyles.avatar,
 									borderWidth: 2,
+									margin: 4,
 									borderColor:
 										currentAvatar === item
 											? accentColor

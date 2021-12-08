@@ -40,6 +40,6 @@ export const CreateRoomStyles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	avatarsWrapperStyle: {
-		justifyContent: "center",
+		alignItems: "center",
 	},
 });

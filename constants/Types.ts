@@ -16,7 +16,7 @@ export type ChatUser = {
 	isHost: string;
 };
 export type RootStackParamList = {
-	Chat: { isPrivate: boolean | "Join" };
+	Chat: { isPrivate: boolean | "Join"; user: User };
 	DrawerList: NavigatorScreenParams<DrawerParamList>;
 };
 
@@ -50,4 +50,10 @@ export interface BottomSheetProps {
 	initialSnapPoint: number;
 	visible: boolean;
 	onClose: () => void;
+}
+
+export interface User {
+	name: string;
+	roomName: string;
+	avatarSvg: string;
 }
