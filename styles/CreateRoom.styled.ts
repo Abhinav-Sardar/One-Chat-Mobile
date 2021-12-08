@@ -10,7 +10,7 @@ export const CreateRoomStyles = StyleSheet.create({
 	field: {
 		width: 80 * vw,
 		alignItems: "flex-start",
-		marginVertical: 15,
+		marginVertical: 25,
 	},
 	label: {
 		fontSize: 6 * vw,
@@ -29,7 +29,7 @@ export const CreateRoomStyles = StyleSheet.create({
 		width: "100%",
 		alignItems: "center",
 		justifyContent: "center",
-		marginTop: 40,
+		marginTop: 15,
 	},
 	avatar: {
 		height: 90,
@@ -37,6 +37,9 @@ export const CreateRoomStyles = StyleSheet.create({
 		borderRadius: 50,
 		borderWidth: 1.5,
 		alignItems: "center",
+		justifyContent: "center",
+	},
+	avatarsWrapperStyle: {
 		justifyContent: "center",
 	},
 });

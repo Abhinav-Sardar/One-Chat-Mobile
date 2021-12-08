@@ -21,12 +21,17 @@ import {
 	Keyboard,
 	Modal,
 	View,
-	Button,
 } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, MAX_BOTTOM_SHEET_HEIGHT, SPRING_CONFIG, vh, vw } from "./Constants";
+import {
+	COLORS,
+	MAX_BOTTOM_SHEET_HEIGHT,
+	TransitionConfig,
+	vh,
+	vw,
+} from "./Constants";
 import AsyncStoage from "@react-native-async-storage/async-storage";
 import {
 	NavigationContainer,
@@ -34,10 +39,15 @@ import {
 	DarkTheme,
 	useNavigation,
 } from "@react-navigation/native";
-import { AccentColorProvider, ThemeProvider, useAccentColor, useTheme } from "./Context";
 import {
-	HeaderProps,
+	AccentColorProvider,
+	ThemeProvider,
+	useAccentColor,
+	useTheme,
+} from "./Context";
+import {
 	BottomSheetProps,
+	HeaderProps,
 	OneButtonProps,
 	RootStackParamList,
 	theme,
@@ -46,6 +56,7 @@ import ComponentStyles from "../styles/Components.styled";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, {
 	interpolate,
+	runOnJS,
 	useAnimatedGestureHandler,
 	useAnimatedReaction,
 	useAnimatedStyle,
@@ -56,6 +67,8 @@ import Animated, {
 import {
 	PanGestureHandler,
 	PanGestureHandlerGestureEvent,
+	TapGestureHandler,
+	TapGestureHandlerGestureEvent,
 	TouchableHighlight,
 } from "react-native-gesture-handler";
 import { CreateRoomStyles } from "../styles/CreateRoom.styled";
@@ -126,7 +139,10 @@ export const SideBar = (props) => {
 								hasOverRidden: true,
 							};
 							setTheme(newTheme);
-							await AsyncStoage.setItem("one-chat-theme", JSON.stringify(newTheme));
+							await AsyncStoage.setItem(
+								"one-chat-theme",
+								JSON.stringify(newTheme)
+							);
 						}}
 					/>
 				</View>
@@ -260,7 +276,8 @@ export const Navigator: FC = ({ children }) => {
 };
 
 export const BottomSheet: FC<BottomSheetProps> = memo((props) => {
-	const { children, initialSnapPoint, title, top } = props;
+	const { children, initialSnapPoint, title, visible, onClose } = props;
+	const top = useSharedValue<number>(MAX_BOTTOM_SHEET_HEIGHT);
 	const theme = useTheme()[0];
 	const animatedStyle = useAnimatedStyle(() => {
 		return {
@@ -271,6 +288,13 @@ export const BottomSheet: FC<BottomSheetProps> = memo((props) => {
 		"worklet";
 		return Math.max(value, 0);
 	};
+	useEffect(() => {
+		if (visible) {
+			top.value = withTiming(initialSnapPoint, TransitionConfig);
+		} else {
+			top.value = withTiming(MAX_BOTTOM_SHEET_HEIGHT, TransitionConfig);
+		}
+	}, [visible]);
 	const panGesture = useAnimatedGestureHandler<
 		PanGestureHandlerGestureEvent,
 		{
@@ -282,12 +306,15 @@ export const BottomSheet: FC<BottomSheetProps> = memo((props) => {
 		},
 		onEnd: () => {
 			if (top.value < initialSnapPoint) {
-				top.value = withSpring(0, SPRING_CONFIG);
+				top.value = withTiming(0, TransitionConfig);
 			} else {
-				if (top.value >= initialSnapPoint && top.value < initialSnapPoint + 200) {
-					top.value = withSpring(initialSnapPoint, SPRING_CONFIG);
+				if (
+					top.value >= initialSnapPoint &&
+					top.value < initialSnapPoint + 200
+				) {
+					top.value = withTiming(initialSnapPoint, TransitionConfig);
 				} else {
-					top.value = withSpring(MAX_BOTTOM_SHEET_HEIGHT, SPRING_CONFIG);
+					runOnJS(onClose)();
 				}
 			}
 		},
@@ -319,9 +346,12 @@ export const BottomSheet: FC<BottomSheetProps> = memo((props) => {
 							{title}
 						</AccentText>
 						<TouchableOpacity
-							onPress={() =>
-								(top.value = withSpring(MAX_BOTTOM_SHEET_HEIGHT, SPRING_CONFIG))
-							}
+							onPress={() => {
+								top.value = withTiming(
+									MAX_BOTTOM_SHEET_HEIGHT,
+									TransitionConfig
+								);
+							}}
 						>
 							<Ionicons
 								name='close-sharp'

@@ -4,7 +4,7 @@ import { View, Text } from "react-native";
 import { DrawerParamList, RootStackParamList } from "../constants/Types";
 // @ts-ignore
 const JoinRoom = ({ navigation }) => {
-  return <View>{/* @ts-ignore */}</View>;
+	return <></>;
 };
 
 export default JoinRoom;

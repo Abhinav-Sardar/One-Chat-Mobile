@@ -9,29 +9,36 @@ import {
 	Pressable,
 	Alert,
 	StyleSheet,
+	FlatList,
+	Modal,
+	VirtualizedList,
+	ToastAndroid,
+	ActivityIndicator,
 } from "react-native";
 import { AccentText, BottomSheet, OneButton } from "../constants/Components";
+import io from "socket.io-client";
 import { CreateRoomStyles } from "../styles/CreateRoom.styled";
 import { SvgXml } from "react-native-svg";
 import { useAccentColor, useTheme } from "../constants/Context";
 import {
-	getAvatars,
+	avatars,
+	getRandomKey,
 	MAX_BOTTOM_SHEET_HEIGHT,
-	SPRING_CONFIG,
+	TransitionConfig,
 	validateNameAndRoomnName,
 	vh,
 	vw,
 } from "../constants/Constants";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-const avatars = getAvatars();
+import { runOnJS, useSharedValue, withTiming } from "react-native-reanimated";
+
 const CreateRoom: FC = () => {
 	const [name, setName] = useState<string>("");
 	const [roomName, setRoomName] = useState<string>("");
-	const top = useSharedValue<number>(MAX_BOTTOM_SHEET_HEIGHT);
-	const [currentAvatar, setCurrentAvatar] = useState<string>("");
+	const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
 	const theme = useTheme()[0];
+	const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 	const hamdleSubmit = () => {
 		const status = validateNameAndRoomnName(name, roomName);
 		if (typeof status === "string") {
@@ -89,19 +96,13 @@ const CreateRoom: FC = () => {
 					/>
 				</View>
 				<View style={CreateRoomStyles.avatars}>
-					<View
-						style={[
-							CreateRoomStyles.avatar,
-							{
-								borderColor: accentColor,
-								marginBottom: 10,
-							},
-						]}
-					>
-						<SvgXml xml={currentAvatar ? currentAvatar : null} height={60} width={60} />
+					<View style={CreateRoomStyles.avatar}>
+						<SvgXml xml={currentAvatar ? currentAvatar : null} />
 					</View>
 					<OneButton
-						onPress={() => {}}
+						onPress={() => {
+							setIsSheetOpen(true);
+						}}
 						viewStyle={{
 							backgroundColor: accentColor,
 							width: 46 * vw,
@@ -117,15 +118,12 @@ const CreateRoom: FC = () => {
 					</OneButton>
 				</View>
 				<OneButton
-					onPress={() => {
-						top.value = withSpring(9 * vh, SPRING_CONFIG);
-						Keyboard.dismiss();
-					}}
+					onPress={() => {}}
 					viewStyle={{
 						backgroundColor: accentColor,
 						width: 46 * vw,
 						height: 8 * vh,
-						marginTop: 90,
+						marginTop: 60,
 					}}
 					textStyle={{
 						color: "white",
@@ -136,10 +134,42 @@ const CreateRoom: FC = () => {
 				</OneButton>
 			</View>
 
-			<BottomSheet top={top} initialSnapPoint={9 * vh} title='Choose Avatar'>
-				<View style={{ flex: 1 }}>
-					<Text>Here come the avatars</Text>
-				</View>
+			<BottomSheet
+				initialSnapPoint={20 * vh}
+				title='Choose An Avatar'
+				visible={isSheetOpen}
+				onClose={() => {
+					setIsSheetOpen(false);
+				}}
+			>
+				<FlatList
+					data={avatars}
+					keyExtractor={(_, index) => index.toString()}
+					contentContainerStyle={CreateRoomStyles.avatarsWrapperStyle}
+					renderItem={({ item }) => {
+						return (
+							<Pressable
+								onPress={() => {
+									setCurrentAvatar(item);
+									setIsSheetOpen(false);
+								}}
+								style={{
+									...CreateRoomStyles.avatar,
+									borderWidth: 2,
+									borderColor:
+										currentAvatar === item
+											? accentColor
+											: theme.type === "dark"
+											? "#fff"
+											: "#000",
+								}}
+							>
+								<SvgXml xml={item} />
+							</Pressable>
+						);
+					}}
+					numColumns={4}
+				/>
 			</BottomSheet>
 		</Pressable>
 	);

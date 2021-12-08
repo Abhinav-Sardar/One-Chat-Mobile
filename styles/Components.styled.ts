@@ -35,7 +35,8 @@ export default StyleSheet.create({
 	headerBanner: {
 		elevation: 6,
 
-		height: (StatusBar.currentHeight ? StatusBar.currentHeight : 7 * vh) + 5 * vh,
+		height:
+			(StatusBar.currentHeight ? StatusBar.currentHeight : 7 * vh) + 5 * vh,
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
@@ -58,7 +59,6 @@ export default StyleSheet.create({
 		borderWidth: 2,
 		borderColor: "gray",
 		width: "100%",
-		elevation: 2,
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
