@@ -31,19 +31,19 @@ export type theme = {
 	type: "light" | "dark";
 	hasOverRidden: boolean;
 };
-export interface HeaderProps {
+export type HeaderProps = {
 	routeName: string;
 	canGoBack: () => boolean;
 	goBack: () => void;
 	toggleDrawer: () => void;
-}
+};
 
 export interface OneButtonProps {
 	viewStyle?: StyleProp<ViewStyle>;
 	textStyle?: StyleProp<TextStyle>;
 	Icon?: React.ComponentType<any>;
 
-	onPress?: () => void;
+	onPress: () => void;
 }
 export interface BottomSheetProps {
 	title: string;
@@ -56,4 +56,11 @@ export interface User {
 	name: string;
 	roomName: string;
 	avatarSvg: string;
+}
+
+export type fieldType = "images" | "gifs" | "share" | "users" | null;
+
+export interface DrawerContentProps {
+	onClose: () => void;
+	onFieldSelected: (field: fieldType) => void
 }

@@ -25,7 +25,6 @@ export const fontConfig = {
 	robboto: require("../assets/fonts/Roboto-Regular.ttf"),
 	montserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
 };
-// export a function getRandomKey which returns a random string consisting of numbers and texts on length 20
 export const getRandomKey = (): string => {
 	const text = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	let key = "";
@@ -64,7 +63,7 @@ export const TransitionConfig = {
 
 export function getAvatars(): string[] {
 	let avartars: string[] = [];
-	for (let i = 0; i < 40; i++) {
+	for (let i = 0; i < 32; i++) {
 		const newAvatar = createAvatar(style, {
 			height: 60,
 			width: 60,

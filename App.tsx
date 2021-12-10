@@ -117,7 +117,12 @@ const App: FC<NativeStackScreenProps<RootStackParamList, "Chat">> = () => {
     return (
       <HOC>
         <Navigator>
-          <Stack.Navigator>
+          <Stack.Navigator
+            screenOptions={{
+              animation: "slide_from_bottom",
+            }}
+            initialRouteName="DrawerList"
+          >
             <Stack.Screen
               name="DrawerList"
               component={DrawerNavigator}

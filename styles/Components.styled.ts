@@ -51,6 +51,7 @@ export default StyleSheet.create({
 		borderTopLeftRadius: 10,
 		borderTopRightRadius: 10,
 		backgroundColor: "rgb(18 , 18, 18)",
+		zIndex: 3
 	},
 	bottomSheetHeader: {
 		height: 10 * vh,
