@@ -24,7 +24,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import io from "socket.io-client";
 import { DrawerContent } from "../constants/ChatComponents";
 import { ChatStyles } from "../styles/Chat.styled";
-
+import { FontAwesome5 } from "@expo/vector-icons";
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, "Chat">;
   route: RouteProp<RootStackParamList, "Chat">;
@@ -36,11 +36,12 @@ const ChatScreen: FC<Props> = ({ route, navigation }) => {
   const [fieldType, setFieldType] = useState<fieldType>(null);
   const theme = useTheme()[0];
   const [text, setText] = useState<string>("");
-  const inpRef = useRef();
+  // @ts-ignore
   const drawerRef = useRef<DrawerLayoutAndroid>("");
   const [isSheetOpen, setisSheetOpen] = useState<boolean>(false);
   const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false);
   const accentColor = useAccentColor()[0];
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
   function Header(): JSX.Element {
     return (
       <>
@@ -104,6 +105,19 @@ const ChatScreen: FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     socket.connect();
     socketCode();
+
+    Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardOpen(true);
+    });
+    Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardOpen(false);
+    });
+    return () => {
+      // @ts-ignore
+      socket.disconnect(true);
+      Keyboard.removeAllListeners("keyboardDidShow");
+      Keyboard.removeAllListeners("keyboardDidHide");
+    };
   }, []);
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -127,29 +141,42 @@ const ChatScreen: FC<Props> = ({ route, navigation }) => {
         />
       )}
     >
-      <View style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={ChatStyles.messages}
-        ></KeyboardAvoidingView>
-        <View style={ChatStyles.inputSection}>
-          <OneButton
-            Icon={() => <AntDesign name="plus" size={24} color="white" />}
-            viewStyle={{
-              height: 50,
-              width: 50,
-              borderRadius: 50,
-              backgroundColor: accentColor,
-              justifyContent: "center",
-              alignItems: "center",
-              marginLeft: 2 * vw,
+      <Pressable
+        android_disableSound
+        onPress={Keyboard.dismiss}
+        style={{ flex: 1 }}
+      >
+        <View style={{ flex: 1 }}>
+          <View
+            style={{
+              ...ChatStyles.messages,
+              height: isKeyboardOpen ? "80%" : "85%",
             }}
-            onPress={() => {
-              drawerRef.current.openDrawer();
+          ></View>
+          <View
+            style={{
+              ...ChatStyles.inputSection,
+              height: isKeyboardOpen ? "20%" : "15%",
             }}
-          />
-          <TextInput />
+          >
+            <OneButton
+              Icon={() => <AntDesign name="plus" size={24} color="white" />}
+              viewStyle={{
+                ...ChatStyles.plusBtn,
+                backgroundColor: accentColor,
+              }}
+              onPress={() => {
+                drawerRef.current.openDrawer();
+                Keyboard.dismiss();
+              }}
+            />
+            <View style={ChatStyles.inputContainer}>
+              <FontAwesome5 name="smile" size={24} color={accentColor} />
+              <TextInput placeholder="Say Something..." />
+            </View>
+          </View>
         </View>
-      </View>
+      </Pressable>
     </DrawerLayoutAndroid>
   );
 };

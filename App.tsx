@@ -69,7 +69,7 @@ const DrawerNavigator: FC<
           fontSize: 20,
         },
         drawerItemStyle: {
-          borderRadius: 10,
+          borderRadius: 5,
         },
       }}
     >
