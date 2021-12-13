@@ -5,31 +5,38 @@ export const ChatStyles = StyleSheet.create({
     messages: {
         borderWidth: 5,
         borderColor: '#000',
+        flex: 1
     },
     inputSection: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
         borderWidth: 2,
         borderColor: '#0099cc',
     },
-    plusBtn: {
-        height: 50,
-        width: 50,
+    actionBtn: {
         borderRadius: 50,
         justifyContent: "center",
         alignItems: "center",
-        marginLeft: 2 * vw,
+        marginHorizontal: 1.5 * vw,
+        height: 45,
+        width: 45,
+
     },
     inputContainer: {
-        borderWidth: 3,
+        borderWidth: 2.5,
         borderColor: '#bd14ca',
         flexDirection: 'row',
-        borderRadius: 20,
-        height: '50%',
+        borderRadius: 100,
+        height: 45,
         alignItems: 'center',
-        flex: .95,
-        marginRight: 3 * vw
+        flex: 1,
+    },
+    input: {
+        flex: 1,
+        height: '100%',
+        paddingHorizontal: 5,
+        fontFamily: 'montserrat',
+        fontSize: 19,
 
     }
 })

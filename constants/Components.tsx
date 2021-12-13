@@ -178,27 +178,34 @@ export const AccentText: FC<{
     </Text>
   );
 };
-
+const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
+const BtnComponents = {
+  animated: AnimatedRipple,
+  "non-animated": Ripple,
+};
 export const OneButton: FC<OneButtonProps> = ({
   textStyle,
+  onPress,
   viewStyle,
   children,
   Icon,
-
-  onPress,
+  ...props
 }) => {
   const theme = useTheme()[0];
   return (
-    <Ripple
-      rippleOpacity={0.2}
-      rippleDuration={500}
-      rippleColor={theme.type === "light" ? "black" : "white"}
+    <Pressable
+      android_ripple={{
+        color: theme.type === "light" ? "black" : "white",
+        borderless: false,
+        radius: 200,
+      }}
       style={[ComponentStyles.rippleButton, viewStyle]}
       onPress={onPress}
+      {...props}
     >
       <Text style={[ComponentStyles.rippleText, textStyle]}>{children}</Text>
       {Icon && <Icon />}
-    </Ripple>
+    </Pressable>
   );
 };
 export const Header: FC<HeaderProps> = (props) => {

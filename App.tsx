@@ -1,8 +1,3 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-} from "@react-navigation/native";
 import React, { FC, useEffect, useState } from "react";
 import {
   createNativeStackNavigator,
@@ -30,7 +25,6 @@ import {
 } from "./constants/Context";
 
 import { withTiming } from "react-native-reanimated";
-import { StatusBar } from "expo-status-bar";
 import { Text } from "react-native";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -128,7 +122,13 @@ const App: FC<NativeStackScreenProps<RootStackParamList, "Chat">> = () => {
               component={DrawerNavigator}
               options={{ headerShown: false }}
             />
-            <Stack.Screen component={ChatScreen} name={"Chat"} />
+            <Stack.Screen
+              component={ChatScreen}
+              name={"Chat"}
+              options={{
+                headerShown: false,
+              }}
+            />
           </Stack.Navigator>
         </Navigator>
       </HOC>

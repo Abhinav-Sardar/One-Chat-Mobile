@@ -200,13 +200,9 @@ const CreateRoom: FC<{
                 style={{
                   ...CreateRoomStyles.avatar,
                   borderWidth: 2,
-                  margin: 4,
-                  borderColor:
-                    currentAvatar === item
-                      ? accentColor
-                      : theme.type === "dark"
-                      ? "#fff"
-                      : "#000",
+                  marginHorizontal: 5,
+                  marginVertical: 3,
+                  borderColor: currentAvatar === item ? accentColor : "yellow",
                 }}
               >
                 <SvgXml xml={item} />

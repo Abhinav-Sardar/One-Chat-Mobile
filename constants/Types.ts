@@ -1,6 +1,6 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
-import React from "react";
-import { Share, StyleProp, TextStyle, ViewStyle } from "react-native";
+import React, { FC } from "react";
+import { PressableProps, Share, StyleProp, TextStyle, ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
 export type DrawerParamList = {
 	Home: undefined;
@@ -38,12 +38,13 @@ export type HeaderProps = {
 	toggleDrawer: () => void;
 };
 
-export interface OneButtonProps {
+export interface OneButtonProps extends PressableProps {
 	viewStyle?: StyleProp<ViewStyle>;
 	textStyle?: StyleProp<TextStyle>;
-	Icon?: React.ComponentType<any>;
+	Icon?: FC;
 
 	onPress: () => void;
+
 }
 export interface BottomSheetProps {
 	title: string;
@@ -63,4 +64,39 @@ export type fieldType = "images" | "gifs" | "share" | "users" | null;
 export interface DrawerContentProps {
 	onClose: () => void;
 	onFieldSelected: (field: fieldType) => void
+}
+
+interface BaseMessage<T> {
+
+	content: string,
+	profilePic: string,
+	accentColor: string,
+	created_at: Date,
+	author: string,
+	className: 'Incoming' | 'Outgoing',
+	id: string,
+	type: T,
+}
+export interface TextMessage extends BaseMessage<'text'> { }
+export interface ImageMessage extends BaseMessage<'image'> {
+	caption: string,
+}
+export interface GifMessage extends BaseMessage<'gif'> {
+	caption: string,
+	preview_url: string,
+}
+export interface ReplyTextMessage extends BaseMessage<'reply_text'> { };
+export interface ReplyImageMessage extends BaseMessage<'reply_image'> {
+	caption: string,
+
+};
+export interface ReplyGifMessage extends BaseMessage<'reply_gif'> {
+	caption: string,
+	preview_url: string,
+};
+
+export type DrawerContentDataProps = {
+	displayName: string;
+	field: fieldType;
+	Icon: (props: { color: string }) => JSX.Element;
 }
